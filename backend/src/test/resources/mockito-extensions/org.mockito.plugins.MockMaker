@@ -1,0 +1,15 @@
+# Use the subclass mock maker instead of Mockito's default inline mock maker.
+#
+# The inline mock maker instruments loaded classes via a Java agent that it
+# self-attaches at runtime by spawning an external process. That attach is
+# blocked in sandboxed and hardened environments, and when it fails Mockito
+# reports it as "unable to load the default implementation of MockMaker", which
+# aborts every @SpringBootTest before the first assertion -- even in tests that
+# use no mocks at all, because Spring Boot's ResetMocksTestExecutionListener
+# initializes Mockito unconditionally.
+#
+# The subclass mock maker needs no agent. Its only limitation is that it cannot
+# mock final classes, final methods or statics. Nothing in this project's tests
+# does: the seams that get mocked are interfaces (the Gmail transport, the
+# clock), which is the design the ingestion framework was built around anyway.
+mock-maker-subclass

@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/api.ts","./src/main.tsx","./src/components/layout.tsx","./src/hooks/useapi.ts","./src/pages/accounts.tsx","./src/pages/budgets.tsx","./src/pages/creditcards.tsx","./src/pages/dashboard.tsx","./src/pages/datasources.tsx","./src/pages/reports.tsx","./src/pages/settings.tsx","./src/pages/transactions.tsx"],"version":"5.8.3"}

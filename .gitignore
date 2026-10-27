@@ -1,0 +1,17 @@
+node_modules/
+frontend/dist/
+backend/target/
+backend/data/
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+*.key
+backend/.mvn-repo/
+backend/target/dev-mvn/
+.DS_Store
+*.iml
+.idea/
+.vscode/
+

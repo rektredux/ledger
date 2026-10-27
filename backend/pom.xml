@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.4.5</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.ledger</groupId>
+  <artifactId>ledger-backend</artifactId>
+  <version>0.1.0</version>
+  <name>Ledger Backend</name>
+  <description>Local-first automatic personal expense ledger</description>
+
+  <properties>
+    <java.version>21</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- sqlite-jdbc is not in Spring Boot's dependency management; pin it here. -->
+    <sqlite-jdbc.version>3.49.1.0</sqlite-jdbc.version>
+  </properties>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!--
+      Schema migrations. Flyway 10 split most databases into separate modules,
+      but SQLite support ships inside flyway-core itself (verified: flyway-core
+      10.20.1 contains org.flywaydb.core.internal.database.sqlite). There is no
+      published org.flywaydb:flyway-database-sqlite artifact - do not add one.
+    -->
+    <dependency>
+      <groupId>org.flywaydb</groupId>
+      <artifactId>flyway-core</artifactId>
+    </dependency>
+
+    <!-- SQLite JDBC driver + the community Hibernate dialect for SQLite. -->
+    <dependency>
+      <groupId>org.xerial</groupId>
+      <artifactId>sqlite-jdbc</artifactId>
+      <version>${sqlite-jdbc.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.hibernate.orm</groupId>
+      <artifactId>hibernate-community-dialects</artifactId>
+    </dependency>
+
+    <!--
+      Gmail is reached through the official Google OAuth 2.0 and Gmail REST v1
+      endpoints using the JDK's built-in HttpClient. We deliberately avoid the
+      google-api-client SDK: it pulls ~15 transitive dependencies for what is a
+      handful of documented HTTPS calls, and a smaller dependency surface is
+      easier to audit for an application that handles financial data.
+    -->
+
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <compilerArgs>
+            <arg>-parameters</arg>
+          </compilerArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <!--
+            Point the forked test JVM's temp directory inside target/. Two
+            things need a writable temp directory that the JVM's default choice
+            on macOS (/var/folders/...) does not provide in a sandboxed
+            environment: Surefire's fork scratch space, and sqlite-jdbc, which
+            unpacks libsqlitejdbc.dylib out of its jar at first connection and
+            fails with a misleading "no native library found" if it cannot.
+
+            target/ itself rather than a subdirectory, because Maven guarantees
+            it exists by the time tests run; a subdirectory would have to be
+            created by another plugin first.
+          -->
+          <argLine>-Djava.io.tmpdir=${project.build.directory}</argLine>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+</project>
